@@ -32,7 +32,6 @@ const NftGallery = ({
     queryFn: fetchNFTGallery,
   });
 
-  console.log("data", data);
   return (
     <section>
       <h2 className="text-2xl font-bold mb-6">Your NFT Gallery</h2>

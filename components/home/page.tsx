@@ -5,7 +5,6 @@ import Hero from "@/components/home/Hero";
 import MintForm from "@/components/home/MintForm";
 import NftGallery from "@/components/home/NFTGallery";
 import { useAccount } from "wagmi";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 const HomePage = () => {
   const [refreshGallery, setRefreshGallery] = useState(false);

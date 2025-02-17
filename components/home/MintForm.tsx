@@ -131,8 +131,6 @@ const MintForm = ({
       // Call your backend API to store metadata
       const res = await storeNFTData(nftMetadata);
 
-      console.log("resss", res);
-
       if (res?.statusCode === 400) {
         const message = Array.isArray(res?.message)
           ? res.message.join(res.message.length > 1 ? ", " : "")
@@ -156,7 +154,6 @@ const MintForm = ({
         );
         await tx.wait();
 
-        console.log("tx", tx);
         showToast("NFT minted successfully!", "success");
 
         // Fetch NFT details after minting.
