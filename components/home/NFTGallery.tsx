@@ -6,6 +6,10 @@ type NftGalleryProps = {
 };
 
 const NftGallery = ({ refreshGallery }: NftGalleryProps): React.JSX.Element => {
+  // const {data} =
+
+  console.log("ref", refreshGallery);
+
   return (
     <section>
       <h2 className="text-2xl font-bold mb-6">Your NFT Gallery</h2>

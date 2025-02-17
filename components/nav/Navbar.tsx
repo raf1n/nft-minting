@@ -2,7 +2,6 @@
 import React from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import WalletConnectButton from "@/components/nav/WalletConnections";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const Navbar = () => {
@@ -18,7 +17,7 @@ const Navbar = () => {
         />
       </div>
       <ConnectButton.Custom>
-        {({ account, chain, openConnectModal, mounted }) => {
+        {({ account, openConnectModal, mounted }) => {
           // If the component isn't mounted or the user is not connected, show your custom button.
           if (!mounted || !account) {
             return (

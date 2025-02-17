@@ -13,6 +13,7 @@ import type { Account, Chain, Client, Transport } from "viem";
 import { type Config, useConnectorClient } from "wagmi";
 import nftMintABI from "@/abis/NFT_ABI.json";
 import { Check } from "lucide-react";
+import { showToast } from "@/components/ui/custom-toast";
 
 export function clientToSigner(client: Client<Transport, Chain, Account>) {
   const { account, chain, transport } = client;
@@ -59,7 +60,6 @@ const MintForm = ({ onMintSuccess }: MintFormProps): React.JSX.Element => {
     imageUrl: "",
   });
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
   // Replace with your deployed contract address
   const contractAddress = "0x743F49311A82fe72eb474c44e78Da2A6e0AE951c";
@@ -74,7 +74,8 @@ const MintForm = ({ onMintSuccess }: MintFormProps): React.JSX.Element => {
         const exists: boolean = await contract.checkId(tokenId);
         if (!exists) return tokenId;
       } catch (error) {
-        // If the call fails, assume the tokenId is available
+        console.error("Error checking token ID", error);
+        showToast("Error checking token ID", "error");
         return tokenId;
       }
     }
@@ -83,18 +84,23 @@ const MintForm = ({ onMintSuccess }: MintFormProps): React.JSX.Element => {
 
   // Store NFT metadata in your backend
   const storeNFTData = async (nftData: NFTData) => {
-    const response = await fetch("http://localhost:5000/nft/store-nft", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(nftData),
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/store-nft`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nftData),
+      },
+    );
     if (!response.ok) throw new Error("Failed to store NFT data in backend.");
     return await response.json();
   };
 
   // Fetch NFT details from your backend using the minted tokenId.
   const fetchNFTData = async (tokenId: number): Promise<NFTData> => {
-    const response = await fetch(`http://localhost:5000/nft/${tokenId}`);
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/${tokenId}`,
+    );
     if (!response.ok) throw new Error("Failed to fetch NFT data.");
     return await response.json();
   };
@@ -102,12 +108,13 @@ const MintForm = ({ onMintSuccess }: MintFormProps): React.JSX.Element => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
+
     if (!signer) {
-      setMessage("Signer not available");
+      showToast("Signer not available", "error");
       setLoading(false);
       return;
     }
+
     try {
       const tokenId = await generateUniqueTokenId();
       const nftMetadata = {
@@ -122,23 +129,27 @@ const MintForm = ({ onMintSuccess }: MintFormProps): React.JSX.Element => {
       await storeNFTData(nftMetadata);
 
       // Construct the metadata URL for the contract mint call
-      const metadataUrl = `http://localhost:5000/nft/${tokenId}`;
+      const metadataUrl = `${process.env.NEXT_PUBLIC_API_URL}/${tokenId}`;
 
       // Create a contract instance with ethers using the signer
       const contract = new ethers.Contract(contractAddress, nftMintABI, signer);
       const tx = await contract.mint(tokenId, metadataUrl);
-      setMessage("Minting transaction sent. Awaiting confirmation...");
+      showToast(
+        "Minting transaction sent. Awaiting confirmation...",
+        "success",
+      );
       await tx.wait();
 
       console.log("tx", tx);
-      setMessage("NFT minted successfully!");
+      showToast("NFT minted successfully!", "success");
 
       // Fetch NFT details after minting.
       const nftData = await fetchNFTData(tokenId);
       setMintedNFT(nftData);
       onMintSuccess(); // Trigger gallery refresh
-    } catch (error: any) {
-      setMessage(`Error: ${error.message}`);
+    } catch (error) {
+      //@ts-expect-error error.message
+      showToast(`Error: ${error?.message}`, "error");
     }
     setLoading(false);
   };
