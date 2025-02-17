@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NFT Minting
 
-## Getting Started
+## API Endpoints
 
-First, run the development server:
+### 1. **Store NFT Data**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Method**: `POST`
+- **Endpoint**: `/nft/store-nft`
+- **Description**: Stores NFT data in the backend.
+- Example:
+  ```json
+  [
+    {
+      "nftId": 13434,
+      "name": "NFT 1",
+      "description": "Description of NFT 1",
+      "logoUrl": "http://example.com/nft1.png",
+      "userWalletAddress": "0x1234567890abcdef"
+    },
+    {
+      "nftId": 2344334,
+      "name": "NFT 2",
+      "description": "Description of NFT 2",
+      "logoUrl": "http://example.com/nft2.png",
+      "userWalletAddress": "0x1234567890abcdef"
+    }
+  ]
+  ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. **Get NFT Gallery**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Method**: `GET`
+- **Endpoint**: `/nft/gallery`
+- **Query Parameter**:
+    - `userWalletAddress`: The wallet address of the user.
+- **Description**: Retrieves the NFT gallery for a given user wallet address.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. **Get NFT Data by ID**
 
-## Learn More
+- **Method**: `GET`
+- **Endpoint**: `/nft/:id`
+- **Description**: Retrieves the NFT data for a given NFT ID.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployed Links
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Deployed API Link**: [API URL](https://nft-minting-backend-flame.vercel.app/)
+- **Deployed Frontend Link**: [Frontend URL](https://nft-minting-ruby.vercel.app/)
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Loom Video
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Video 1
+  (
+  Backend) : [Loom Video Link](https://www.loom.com/share/f13e8449d8004a3bb968f425372a3b9e?sid=80462bcf-f2cc-4574-8287-33d9412bd45a)
+- Video 2
+  (
+  Frontend) : [Loom Video Link](https://www.loom.com/share/f13e8449d8004a3bb968f425372a3b9e?sid=80462bcf-f2cc-4574-8287-33d9412bd45a)
+
+---
+
+## Backend Repository
+
+- **Backend Repository**: [GitHub Backend Repo](https://github.com/raf1n/nft-minting-backend)
+
+---
+
+## Description
+
+This project is a full-stack NFT minting application. The backend is built with Node.js and Nest.js, using PostgreSQL to
+store NFT metadata. The frontend, created with Next.js, allows users to mint NFTs, interact with Ethereum smart
+contracts, and view a gallery of their minted NFTs. The application includes wallet connection features via Wagmi and
+RainbowKit, and it is deployed on free hosting platforms for both the frontend and backend.
+

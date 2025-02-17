@@ -1,47 +1,73 @@
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { NFTData } from "@/components/home/MintForm";
+import Image from "next/image";
+import NoNftFound from "@/components/home/NoNFTFound";
 
 type NftGalleryProps = {
   refreshGallery: boolean;
+  walletAddress: `0x${string}` | undefined;
 };
 
-const NftGallery = ({ refreshGallery }: NftGalleryProps): React.JSX.Element => {
-  // const {data} =
+const NftGallery = ({
+  refreshGallery,
+  walletAddress,
+}: NftGalleryProps): React.JSX.Element => {
+  const fetchNFTGallery = async () => {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/gallery?userWalletAddress=${walletAddress}`,
+    );
 
-  console.log("ref", refreshGallery);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch: ${response.statusText}`);
+    }
 
+    return response.json();
+  };
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["nftGallery", refreshGallery],
+    queryFn: fetchNFTGallery,
+  });
+
+  console.log("data", data);
   return (
     <section>
       <h2 className="text-2xl font-bold mb-6">Your NFT Gallery</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-[#1f2937]/50 border-0 overflow-hidden">
-          <div className="aspect-video bg-gradient-to-r from-pink-500 to-purple-500" />
-          <CardContent className="p-4">
-            <h3 className="font-bold mb-1">Cosmic Dreams #001</h3>
-            <p className="text-sm text-[#9ca3af]">
-              A journey through digital dimensions
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="bg-[#1f2937]/50 border-0 overflow-hidden">
-          <div className="aspect-video bg-[url('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/NFT_Minting_Page__Copy_-pvOdslEgxl2swplBAVV8A2RT78aEGb.png')] bg-cover bg-center" />
-          <CardContent className="p-4">
-            <h3 className="font-bold mb-1">Neo Genesis #002</h3>
-            <p className="text-sm text-[#9ca3af]">
-              Digital evolution manifested
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="bg-[#1f2937]/50 border-0 overflow-hidden">
-          <div className="aspect-video bg-gradient-to-r from-purple-500 to-blue-500" />
-          <CardContent className="p-4">
-            <h3 className="font-bold mb-1">Digital Horizon #003</h3>
-            <p className="text-sm text-[#9ca3af]">
-              Where reality meets digital art
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center">
+          <LoadingSpinner size="2xl" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {data?.length > 0 ? (
+            data?.map((nft: NFTData, i: number) => (
+              <Card
+                key={i}
+                className="bg-gray-900/50 overflow-hidden border-gray-800"
+              >
+                <div className={`aspect-video relative `}>
+                  <Image
+                    src={nft.logoUrl}
+                    alt={nft.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-4">
+                  <h3 className="text-white font-semibold mb-2">{nft.name}</h3>
+                  <p className="text-gray-400 text-sm">{nft.description}</p>
+                </div>
+              </Card>
+            ))
+          ) : (
+            <NoNftFound />
+          )}
+        </div>
+      )}
     </section>
   );
 };

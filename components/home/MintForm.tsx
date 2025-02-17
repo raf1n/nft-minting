@@ -1,19 +1,17 @@
 "use client";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { useAccount } from "wagmi";
-import { ethers } from "ethers";
-import { BrowserProvider, JsonRpcSigner } from "ethers";
-import { useMemo } from "react";
-import type { Account, Chain, Client, Transport } from "viem";
 import { type Config, useConnectorClient } from "wagmi";
+import { BrowserProvider, ethers, JsonRpcSigner } from "ethers";
+import type { Account, Chain, Client, Transport } from "viem";
 import nftMintABI from "@/abis/NFT_ABI.json";
 import { Check } from "lucide-react";
 import { showToast } from "@/components/ui/custom-toast";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export function clientToSigner(client: Client<Transport, Chain, Account>) {
   const { account, chain, transport } = client;
@@ -35,9 +33,10 @@ export function useEthersSigner({ chainId }: { chainId?: number } = {}) {
 
 type MintFormProps = {
   onMintSuccess: () => void;
+  address: `0x${string}` | undefined;
 };
 
-type NFTData = {
+export type NFTData = {
   name: string;
   description: string;
   logoUrl: string;
@@ -45,12 +44,11 @@ type NFTData = {
   userWalletAddress: `0x${string}` | undefined;
 };
 
-const MintForm = ({ onMintSuccess }: MintFormProps): React.JSX.Element => {
-  const { address, isConnected } = useAccount();
-
+const MintForm = ({
+  onMintSuccess,
+  address,
+}: MintFormProps): React.JSX.Element => {
   const [mintedNFT, setMintedNFT] = useState<NFTData | null>(null);
-
-  console.log({ address, isConnected });
 
   const signer = useEthersSigner();
 
@@ -82,18 +80,23 @@ const MintForm = ({ onMintSuccess }: MintFormProps): React.JSX.Element => {
     throw new Error("Unable to generate a unique token ID.");
   };
 
-  // Store NFT metadata in your backend
   const storeNFTData = async (nftData: NFTData) => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/store-nft`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(nftData),
-      },
-    );
-    if (!response.ok) throw new Error("Failed to store NFT data in backend.");
-    return await response.json();
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/store-nft`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(nftData),
+        },
+      );
+
+      // Read the response body once
+      return await response.json();
+    } catch (error) {
+      console.error("Error storing NFT data:", error);
+      throw error; // Re-throw if you want the caller to handle it
+    }
   };
 
   // Fetch NFT details from your backend using the minted tokenId.
@@ -126,32 +129,46 @@ const MintForm = ({ onMintSuccess }: MintFormProps): React.JSX.Element => {
       };
 
       // Call your backend API to store metadata
-      await storeNFTData(nftMetadata);
+      const res = await storeNFTData(nftMetadata);
 
-      // Construct the metadata URL for the contract mint call
-      const metadataUrl = `${process.env.NEXT_PUBLIC_API_URL}/${tokenId}`;
+      console.log("resss", res);
 
-      // Create a contract instance with ethers using the signer
-      const contract = new ethers.Contract(contractAddress, nftMintABI, signer);
-      const tx = await contract.mint(tokenId, metadataUrl);
-      showToast(
-        "Minting transaction sent. Awaiting confirmation...",
-        "success",
-      );
-      await tx.wait();
+      if (res?.statusCode === 400) {
+        const message = Array.isArray(res?.message)
+          ? res.message.join(res.message.length > 1 ? ", " : "")
+          : res.message;
+        showToast(message, "error");
+      } else if (res?.success) {
+        // Construct the metadata URL for the contract mint call
+        const metadataUrl = `${process.env.NEXT_PUBLIC_API_URL}/${tokenId}`;
 
-      console.log("tx", tx);
-      showToast("NFT minted successfully!", "success");
+        // Create a contract instance with ethers using the signer
+        const contract = new ethers.Contract(
+          contractAddress,
+          nftMintABI,
+          signer,
+        );
 
-      // Fetch NFT details after minting.
-      const nftData = await fetchNFTData(tokenId);
-      setMintedNFT(nftData);
-      onMintSuccess(); // Trigger gallery refresh
-    } catch (error) {
-      //@ts-expect-error error.message
-      showToast(`Error: ${error?.message}`, "error");
+        const tx = await contract.mint(tokenId, metadataUrl);
+        showToast(
+          "Minting transaction sent. Awaiting confirmation...",
+          "success",
+        );
+        await tx.wait();
+
+        console.log("tx", tx);
+        showToast("NFT minted successfully!", "success");
+
+        // Fetch NFT details after minting.
+        const nftData = await fetchNFTData(tokenId);
+        setMintedNFT(nftData);
+        onMintSuccess(); // Trigger gallery refresh
+      }
+    } catch (error: any) {
+      showToast(`Error: ${error}`, "error");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -250,7 +267,7 @@ const MintForm = ({ onMintSuccess }: MintFormProps): React.JSX.Element => {
                   height={15}
                   alt={"logo"}
                 />{" "}
-                Mint NFT
+                Mint NFT {loading ? <LoadingSpinner size="sm" /> : ""}
               </Button>
             </form>
           </CardContent>

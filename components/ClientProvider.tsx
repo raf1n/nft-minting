@@ -12,7 +12,7 @@ type ClientProvidersProps = {
 
 const config = getDefaultConfig({
   appName: "My RainbowKit App",
-  projectId: "3b26653a5165b310319675326bd3ef2a",
+  projectId: process.env.NEXT_PUBLIC_PROJECT_ID || "",
   chains: [mainnet, sepolia],
   ssr: true,
 });

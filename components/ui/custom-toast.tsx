@@ -20,7 +20,10 @@ export const CustomToast = ({ t, message, type }: CustomToastProps) => {
             <p className="text-sm font-medium text-white">
               {type === "error" ? "Error" : "Success"}
             </p>
-            <p className="mt-1 text-sm text-gray-400">{message}</p>
+            {/* Message styling: wraps long text, limits max height with scrolling */}
+            <p className="mt-1 text-sm text-gray-400 break-words max-h-32 overflow-y-auto">
+              {message}
+            </p>
           </div>
         </div>
       </div>
