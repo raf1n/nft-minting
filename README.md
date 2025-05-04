@@ -48,21 +48,6 @@
 - **Deployed API Link**: [API URL](https://nft-minting-backend-flame.vercel.app/)
 - **Deployed Frontend Link**: [Frontend URL](https://nft-minting-ruby.vercel.app/)
 
----
-
-## Loom Video
-
-- Video 1
-  (
-  Backend) : [Loom Video Link](https://www.loom.com/share/f13e8449d8004a3bb968f425372a3b9e?sid=80462bcf-f2cc-4574-8287-33d9412bd45a)
-- Video 2
-  (
-  Frontend)
-    1) : [Loom Video Link](https://www.loom.com/share/c02b7f3037184616a50c74016cf47512?sid=3b6f847b-f416-4421-b0c3-66c1699bba1c)
-    2) : [Loom Video Link](https://www.loom.com/share/b58fcfe4884c44ffbc59f52ea99c494b?sid=90283ceb-b0df-4aec-a4b4-73e0e62a2094)
-    3) : [Loom Video Link](https://www.loom.com/share/34151d018bd04dcc844604046b028ff6?sid=9704c69f-1e3a-44f0-bd2a-313e1e9c58dd)
-
----
 
 ## Backend Repository
 
